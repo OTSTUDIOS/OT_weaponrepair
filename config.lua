@@ -1,5 +1,8 @@
 Config = {}
 
+Config.useOTSkills = false -- requires our skills system, you can find here: https://forum.cfx.re/t/paid-ot-skills/4917372
+Config.xpreward = 5
+
 Config.requireditem = 'money'
 Config.requireditemamount = 1000
 Config.repairtime = 5000

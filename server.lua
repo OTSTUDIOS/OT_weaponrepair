@@ -1,6 +1,18 @@
 local ox_inventory = exports.ox_inventory
 local repairs = {}
 
+if Config.useOTSkills then
+    exports.OT_skills:registerSkill({
+        name = 'gunsmithing',
+        multiplier = 2.5,
+        maxlevel = 30,
+        maxReward = 20,
+        maxDeduction = 20,
+        label = 'Gunsmithing',
+        description = 'A master gunsmith can assemble, repair and modify even the rarest of firearms.'
+    })
+end
+
 RegisterNetEvent('OT_weaponrepair:startweaponrepair', function(data)
     local src = source
     local slot = ox_inventory:GetSlot(src, data.slot)
@@ -28,7 +40,10 @@ RegisterNetEvent('OT_weaponrepair:fixweapon', function()
     if repairs[src] then
         local slot = ox_inventory:GetSlot(src, repairs[src].slot)
         if slot and slot.name == repairs[src].name then
-            ox_inventory:SetDurability(source, repairs[src].slot, 100)
+            ox_inventory:SetDurability(src, repairs[src].slot, 100)
+            if Config.useOTSkills then
+                exports.OT_skills:addXP(src, 'gunsmithing', Config.xpreward)
+            end
             repairs[src] = nil
         elseif slot and slot.name ~= repairs[src].name then
             print('Player ID:', src, 'Attempting to fixweapon with data mismatch, probably cheating')
