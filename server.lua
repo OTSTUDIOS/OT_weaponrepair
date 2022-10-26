@@ -8,7 +8,7 @@ RegisterNetEvent('OT_weaponrepair:startweaponrepair', function(data)
         local requiredItem = Config.require[data.name] and Config.require[data.name].requireditem or Config.requireditem
         local requiredAmount = Config.require[data.name] and Config.require[data.name].requireditemamount or Config.requireditemamount
         local count = ox_inventory:Search(src, 'count', requiredItem)
-        if count > requiredAmount then
+        if count >= requiredAmount then
             ox_inventory:RemoveItem(src, requiredItem, requiredAmount)
             repairs[src] = {}
             repairs[src].slot = data.slot
