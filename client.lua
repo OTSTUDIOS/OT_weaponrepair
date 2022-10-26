@@ -19,7 +19,7 @@ end
 RegisterNetEvent('OT_weaponrepair:repairitem', function(name)
     TriggerEvent('ox_inventory:disarm')
     if lib.progressBar({
-        duration = Config.require[name] and Config.require[name].repair_time or Config.repair_time,
+        duration = Config.require[name] and Config.require[name].repairtime or Config.repairtime,
         label = 'Repairing Weapon',
         useWhileDead = false,
         canCancel = false,
