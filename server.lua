@@ -8,13 +8,15 @@ RegisterNetEvent('OT_weaponrepair:startweaponrepair', function(data)
         local requiredItem = Config.require[data.name] and Config.require[data.name].requireditem or Config.requireditem
         local requiredAmount = Config.require[data.name] and Config.require[data.name].requireditemamount or Config.requireditemamount
         local count = ox_inventory:Search(src, 'count', requiredItem)
-        if not count then return end
+        if not count then return TriggerClientEvent('ox_lib:notify', src, {type = 'error', title = 'Workbench', description = 'Missing Required items'}) end
         if count >= requiredAmount then
             ox_inventory:RemoveItem(src, requiredItem, requiredAmount)
             repairs[src] = {}
             repairs[src].slot = data.slot
             repairs[src].name = data.name
             TriggerClientEvent('OT_weaponrepair:repairitem', src, data.name)
+        else
+            TriggerClientEvent('ox_lib:notify', src, {type = 'error', title = 'Workbench', description = string.format('You dont have enough %s', requiredItem)})
         end
     elseif slot and slot.name ~= data.name then
         print('Player ID:', src, 'Attempting to fixweapon with incorrect data, probably cheating')
