@@ -6,6 +6,7 @@ Config.xpreward = 5
 Config.requireditem = 'money'
 Config.requireditemamount = 1000
 Config.repairtime = 5000
+Config.repairItem = 'weaponrepairkit'
 
 Config.require = {
     ['WEAPON_COMBATPDW'] = {

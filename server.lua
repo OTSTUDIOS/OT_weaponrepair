@@ -13,6 +13,16 @@ if Config.useOTSkills then
     })
 end
 
+local function fixWeapon(payload)
+    if type(payload) ~= 'table' or table.type(payload) == 'empty' then return end
+    TriggerClientEvent('ox_inventory:closeInventory', payload.source)
+    ox_inventory:RemoveItem(payload.source, payload.fromSlot.name, 1)
+    repairs[payload.source] = {}
+    repairs[payload.source].slot = payload.toSlot.slot
+    repairs[payload.source].name = payload.toSlot.name
+    TriggerClientEvent('OT_weaponrepair:repairitem', payload.source, payload.toSlot.name)
+end
+
 RegisterNetEvent('OT_weaponrepair:startweaponrepair', function(data)
     local src = source
     local slot = ox_inventory:GetSlot(src, data.slot)
@@ -56,3 +66,14 @@ end)
 lib.callback.register('openRepairBench', function(source)
     return ox_inventory:Search(source, 'slots', Weapons)
 end)
+
+local hookId = exports.ox_inventory:registerHook('swapItems', function(payload)
+    if payload.fromSlot.name == Config.repairItem then
+        if WeaponHashes[payload.toSlot.name] then
+            if payload.toSlot.metadata.durability >= 100.0 then TriggerClientEvent('ox_lib:notify', payload.source, {position = 'top', type = 'error', description = 'Weapon does not need repairing'}) return false end
+            CreateThread(function() fixWeapon(payload) end)
+            return false
+        end
+    end
+    return true
+end, {print = true, itemFilter = Filter})
