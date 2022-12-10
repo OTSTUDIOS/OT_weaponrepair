@@ -1,13 +1,13 @@
 local props = {}
 
-local function openRepairBench()
+local function openRepairBench(i)
     local options = {}
     local items = lib.callback.await('openRepairBench', false)
     if items then
         for name, data in pairs(items) do
             for _, v in pairs(data) do
                 if v.slot then
-                    options[#options+1] = {id = name .. v.slot, title = v.label, description = string.format('Durability: %s', v.metadata.durability .. '%'), serverEvent = 'OT_weaponrepair:startweaponrepair', args = {slot = v.slot, name = name}}
+                    options[#options+1] = {id = name .. v.slot, title = v.label, description = string.format('Durability: %s', v.metadata.durability .. '%'), serverEvent = 'OT_weaponrepair:startweaponrepair', args = {slot = v.slot, name = name, bench = i}}
                 end
             end
         end
@@ -54,7 +54,7 @@ for i = 1, #Config.locations do
         end
     end
 
-    local bench = lib.points.new(location.coords, 2, {})
+    local bench = lib.points.new(location.coords, 2, {index = i})
 
     function bench:onEnter()
         lib.showTextUI('[E] - Open Repair Bench', {icon = 'wrench'})
@@ -66,14 +66,14 @@ for i = 1, #Config.locations do
 
     function bench:nearby()
         if IsControlJustReleased(0, 38) then
-            openRepairBench()
+            openRepairBench(self.index)
         end
     end
 end
 
 AddEventHandler('onResourceStop', function(name)
     if name ~= cache.resource then return end
-    for k, v in pairs(props) do
+    for _, v in pairs(props) do
         DeleteEntity(v)
     end
 end)

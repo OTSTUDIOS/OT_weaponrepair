@@ -1,7 +1,7 @@
 fx_version 'cerulean'
 game 'gta5'
 author 'stuxxy'
-version '1.0.0'
+version '1.1.0'
 lua54 'yes'
 
 shared_scripts {
@@ -16,4 +16,8 @@ server_scripts {
 
 client_scripts {
     'client.lua'
+}
+
+escrow_ignore {
+    '*.lua'
 }

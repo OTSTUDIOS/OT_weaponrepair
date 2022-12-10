@@ -27,18 +27,28 @@ RegisterNetEvent('OT_weaponrepair:startweaponrepair', function(data)
     local src = source
     local slot = ox_inventory:GetSlot(src, data.slot)
     if slot and slot.name == data.name then
-        local requiredItem = Config.require[data.name] and Config.require[data.name].requireditem or Config.requireditem
-        local requiredAmount = Config.require[data.name] and Config.require[data.name].requireditemamount or Config.requireditemamount
-        local count = ox_inventory:Search(src, 'count', requiredItem)
-        if not count then return TriggerClientEvent('ox_lib:notify', src, {type = 'error', title = 'Workbench', description = 'Missing Required items'}) end
-        if count >= requiredAmount then
-            ox_inventory:RemoveItem(src, requiredItem, requiredAmount)
+        local pCoords = GetEntityCoords(GetPlayerPed(src))
+        if not Config.locations[data.bench].free then
+            local requiredItem = Config.require[data.name] and Config.require[data.name].requireditem or Config.requireditem
+            local requiredAmount = Config.require[data.name] and Config.require[data.name].requireditemamount or Config.requireditemamount
+            local count = ox_inventory:Search(src, 'count', requiredItem)
+            if #(pCoords - Config.locations[data.bench].coords) > 10.0 then print('Player ID:', src, 'Attempting to fixweapon away from bench, probably cheating') return end
+            if not count then return TriggerClientEvent('ox_lib:notify', src, {type = 'error', title = 'Workbench', description = 'Missing Required items'}) end
+            if count >= requiredAmount then
+                ox_inventory:RemoveItem(src, requiredItem, requiredAmount)
+                repairs[src] = {}
+                repairs[src].slot = data.slot
+                repairs[src].name = data.name
+                TriggerClientEvent('OT_weaponrepair:repairitem', src, data.name)
+            else
+                TriggerClientEvent('ox_lib:notify', src, {type = 'error', title = 'Workbench', description = string.format('You dont have enough %s', requiredItem)})
+            end
+        else
+            if #(pCoords - Config.locations[data.bench].coords) > 10.0 then print('Player ID:', src, 'Attempting to fixweapon for free away from bench, probably cheating') return end
             repairs[src] = {}
             repairs[src].slot = data.slot
             repairs[src].name = data.name
             TriggerClientEvent('OT_weaponrepair:repairitem', src, data.name)
-        else
-            TriggerClientEvent('ox_lib:notify', src, {type = 'error', title = 'Workbench', description = string.format('You dont have enough %s', requiredItem)})
         end
     elseif slot and slot.name ~= data.name then
         print('Player ID:', src, 'Attempting to fixweapon with incorrect data, probably cheating')
