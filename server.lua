@@ -78,7 +78,7 @@ lib.callback.register('openRepairBench', function(source)
 end)
 
 local hookId = exports.ox_inventory:registerHook('swapItems', function(payload)
-    if payload.fromSlot.name == Config.repairItem then
+    if type(payload.toSlot) == 'table' and payload.fromSlot.name == Config.repairItem then
         if WeaponHashes[payload.toSlot.name] then
             if payload.toSlot.metadata.durability >= 100.0 then TriggerClientEvent('ox_lib:notify', payload.source, {position = 'top', type = 'error', description = 'Weapon does not need repairing'}) return false end
             CreateThread(function() fixWeapon(payload) end)
