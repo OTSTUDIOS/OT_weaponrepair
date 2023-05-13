@@ -35,6 +35,8 @@ RegisterNetEvent('OT_weaponrepair:repairitem', function(name)
     end
 end)
 
+
+local target = GetResourceState('ox_target') == 'started' and true or false
 for i = 1, #Config.locations do
 
     local location = Config.locations[i]
@@ -47,26 +49,69 @@ for i = 1, #Config.locations do
             props[self.index] = CreateObject(`gr_prop_gr_bench_02a`, self.coords.x, self.coords.y, self.coords.z, false, false, false)
             SetEntityHeading(props[self.index], self.heading)
             FreezeEntityPosition(props[self.index], true)
+            if target then
+                exports.ox_target:addLocalEntity(props[i], {
+                    {
+                        name = 'weaponrepair:openRepairBench',
+                        icon = 'fa-solid fa-wrench',
+                        label = 'Open Repair Bench',
+                        canInteract = function(entity, distance, coords, name, bone)
+                            return distance <= 2.0
+                        end,
+                        onSelect = function(entity, distance, coords, name, bone)
+                            openRepairBench(i)
+                        end
+                    }
+                })
+            end
         end
 
         function benchfar:onExit()
-            DeleteEntity(props[self.index])
+            if DoesEntityExist(props[self.index]) then
+                if target then
+                    exports.ox_target:removeLocalEntity(props[self.index], {'weaponrepair:openRepairBench'})
+                end
+                DeleteEntity(props[self.index])
+            end
         end
     end
 
-    local bench = lib.points.new(location.coords, 2, {index = i})
+    if target then
+        if not location.spawnprop then
+            exports.ox_target:addBoxZone({
+                coords = location.coords,
+                size = vec3(2, 2, 2),
+                rotation = location.heading,
+                options = {
+                    {
+                        name = 'weaponrepair:openRepairBenchZone',
+                        icon = 'fa-solid fa-wrench',
+                        label = 'Open Repair Bench',
+                        canInteract = function(entity, distance, coords, name, bone)
+                            return distance <= 3.0
+                        end,
+                        onSelect = function(entity, distance, coords, name, bone)
+                            openRepairBench(i)
+                        end
+                    }
+                }
+            })
+        end
+    else
+        local bench = lib.points.new(location.coords, 2, {index = i})
 
-    function bench:onEnter()
-        lib.showTextUI('[E] - Open Repair Bench', {icon = 'wrench'})
-    end
-
-    function bench:onExit()
-        lib.hideTextUI()
-    end
-
-    function bench:nearby()
-        if IsControlJustReleased(0, 38) then
-            openRepairBench(self.index)
+        function bench:onEnter()
+            lib.showTextUI('[E] - Open Repair Bench', {icon = 'wrench'})
+        end
+    
+        function bench:onExit()
+            lib.hideTextUI()
+        end
+    
+        function bench:nearby()
+            if IsControlJustReleased(0, 38) then
+                openRepairBench(self.index)
+            end
         end
     end
 end
@@ -74,6 +119,11 @@ end
 AddEventHandler('onResourceStop', function(name)
     if name ~= cache.resource then return end
     for _, v in pairs(props) do
-        DeleteEntity(v)
+        if DoesEntityExist(v) then
+            if target then
+                exports.ox_target:removeLocalEntity(v, {'weaponrepair:openRepairBench'})
+            end
+            DeleteEntity(v)
+        end
     end
 end)
