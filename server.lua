@@ -86,4 +86,4 @@ local hookId = exports.ox_inventory:registerHook('swapItems', function(payload)
         end
     end
     return true
-end, {print = true, itemFilter = Filter})
+end, {print = false, itemFilter = Filter})
